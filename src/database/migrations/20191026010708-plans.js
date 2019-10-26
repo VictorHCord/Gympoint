@@ -13,7 +13,7 @@ module.exports = {
         allowNull: false,
       },
       duration: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       price: {
