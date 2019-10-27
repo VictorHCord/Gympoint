@@ -24,5 +24,9 @@ routes.get('/students/:id', StudentController.show);
 
 routes.post('/files', upload.single('file'), FileController.store);
 
+// Atualização dos planos
 routes.post('/plans', PlansController.store);
+routes.put('/plans/:myPlanId', PlansController.update);
+routes.delete('/plans/:myPlanId', PlansController.delete);
+
 export default routes;
