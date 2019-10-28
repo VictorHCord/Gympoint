@@ -53,9 +53,9 @@ class StudentController {
   async show(req, res) {
     const { id } = req.params;
 
-    const student = await Student.findByPk(id);
+    const { name, age, weight, height } = await Student.findByPk(id);
 
-    return res.json(student);
+    return res.json({ name, age, weight, height });
   }
 }
 

@@ -1,6 +1,14 @@
 import Plans from '../models/Plans';
 
 class PlansController {
+  async index(req, res) {
+    const allPlans = await Plans.findAll({
+      attributes: ['id', 'title', 'duration', 'price'],
+    });
+
+    return res.json(allPlans);
+  }
+
   async store(req, res) {
     const plansExist = await Plans.findOne({
       where: { title: req.body.title },
