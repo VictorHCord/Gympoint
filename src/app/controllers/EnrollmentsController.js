@@ -1,7 +1,8 @@
 import * as Yup from 'yup';
 import { startOfHour, parseISO, isBefore } from 'date-fns';
 import Enrollments from '../models/Enrollments';
-import User from '../models/User';
+import Student from '../models/Student';
+import Plans from '../models/Plans';
 
 class EnrollmentstController {
   async store(req, res) {
@@ -19,12 +20,13 @@ class EnrollmentstController {
 
     const { student_id, start_date, plan_id, end_date, price } = req.body;
 
-    const checkEnrolls = await User.findOne({
+    const checkEnrolls = await Student.findOne({
       where: { id: student_id },
+      attributes: ['name', 'email'],
     });
 
     if (!checkEnrolls) {
-      return res.status(401).json({ error: 'Not confirmation' });
+      return res.status(401).json({ error: 'Student dont have id' });
     }
 
     const hourStart = startOfHour(parseISO(start_date));
@@ -49,11 +51,21 @@ class EnrollmentstController {
       return res.status(401).json({ error: 'Enrollsment is not available' });
     }
 
+    const plansAvailable = await Plans.findOne({
+      where: { id: plan_id },
+      attributes: ['title', 'duration'],
+    });
+
+    if (!plansAvailable) {
+      return res
+        .status(401)
+        .json({ error: 'Plans does not exist, please careful' });
+    }
+
     const createRegis = await Enrollments.create({
-      user_id: req.userId,
       plan_id,
       student_id,
-      start_date,
+      start_date: hourStart,
       end_date,
       price,
     });
