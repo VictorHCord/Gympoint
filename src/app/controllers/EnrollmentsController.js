@@ -11,14 +11,13 @@ class EnrollmentstController {
       plan_id: Yup.number().required(),
       start_date: Yup.date().required(),
       end_date: Yup.date().required(),
-      price: Yup.number().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: 'Validation Fails' });
     }
 
-    const { student_id, start_date, plan_id, end_date, price } = req.body;
+    const { student_id, start_date, plan_id, end_date } = req.body;
 
     const checkEnrolls = await Student.findOne({
       where: { id: student_id },
@@ -53,7 +52,7 @@ class EnrollmentstController {
 
     const plansAvailable = await Plans.findOne({
       where: { id: plan_id },
-      attributes: ['title', 'duration'],
+      attributes: ['title', 'duration', 'price'],
     });
 
     if (!plansAvailable) {
@@ -62,12 +61,14 @@ class EnrollmentstController {
         .json({ error: 'Plans does not exist, please careful' });
     }
 
+    const totalPrice = plansAvailable.price * plansAvailable.duration;
+
     const createRegis = await Enrollments.create({
       plan_id,
       student_id,
       start_date: hourStart,
       end_date,
-      price,
+      price: totalPrice,
     });
     return res.json(createRegis);
   }
