@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { startOfHour, parseISO, isBefore } from 'date-fns';
+import { parseISO, isBefore, addMonths } from 'date-fns';
 import Enrollments from '../models/Enrollments';
 import Student from '../models/Student';
 import Plans from '../models/Plans';
@@ -10,14 +10,13 @@ class EnrollmentstController {
       student_id: Yup.number().required(),
       plan_id: Yup.number().required(),
       start_date: Yup.date().required(),
-      end_date: Yup.date().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
       return res.status(400).json({ error: 'Validation Fails' });
     }
 
-    const { student_id, start_date, plan_id, end_date } = req.body;
+    const { student_id, plan_id } = req.body;
 
     const checkEnrolls = await Student.findOne({
       where: { id: student_id },
@@ -28,10 +27,10 @@ class EnrollmentstController {
       return res.status(401).json({ error: 'Student dont have id' });
     }
 
-    const hourStart = startOfHour(parseISO(start_date));
+    const startDate = parseISO(req.body.start_date);
 
     /* verify if dates is before or not  */
-    if (isBefore(hourStart, new Date())) {
+    if (isBefore(startDate, new Date())) {
       return res.status(400).json({
         error: 'past dates are not permitted',
       });
@@ -42,7 +41,7 @@ class EnrollmentstController {
     const checkEnrollsment = await Enrollments.findOne({
       where: {
         student_id,
-        start_date: hourStart,
+        start_date: startDate,
       },
     });
 
@@ -61,13 +60,18 @@ class EnrollmentstController {
         .json({ error: 'Plans does not exist, please careful' });
     }
 
-    const totalPrice = plansAvailable.price * plansAvailable.duration;
+    /* Calculate value of price */
+    const totalPrice = await (plansAvailable.price * plansAvailable.duration);
+
+    /* Calculate final date */
+
+    const finalDate = addMonths(startDate, plansAvailable.duration);
 
     const createRegis = await Enrollments.create({
       plan_id,
       student_id,
-      start_date: hourStart,
-      end_date,
+      start_date: startDate,
+      end_date: finalDate,
       price: totalPrice,
     });
     return res.json(createRegis);
