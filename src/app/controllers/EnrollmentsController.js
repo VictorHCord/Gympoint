@@ -1,8 +1,10 @@
 import * as Yup from 'yup';
-import { parseISO, isBefore, addMonths } from 'date-fns';
+import { parseISO, isBefore, addMonths, format } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 import Enrollments from '../models/Enrollments';
 import Student from '../models/Student';
 import Plans from '../models/Plans';
+import Notification from '../schemas/Notification';
 
 class EnrollmentstController {
   async index(req, res) {
@@ -123,6 +125,31 @@ class EnrollmentstController {
       end_date: finalDate,
       price: totalPrice,
     });
+
+    /* Notify about created of enrollments */
+
+    const getName = await Student.findOne({
+      where: { id: student_id },
+    });
+
+    const formattedDate = format(
+      startDate,
+      "'Data de inicio:' dd 'de' MMMM 'de' yyyy ', às' H:mm'h'",
+
+      { locale: pt }
+    );
+
+    const formattedEnd = format(
+      finalDate,
+      "'Data de encerramento:' dd 'de' MMMM 'de' yyyy ', às' H:mm'h'",
+      { locale: pt }
+    );
+
+    await Notification.create({
+      content: `Inscrição realizada, no nome de ${getName.name}. ${formattedDate} e ${formattedEnd}`,
+      user: student_id,
+    });
+
     return res.json(createRegis);
   }
 
@@ -180,7 +207,7 @@ class EnrollmentstController {
         .status(401)
         .json({ error: 'Plans does not exist, please careful' });
     }
-
+    /* Get ID params and verify o id for update  */
     const enrollmentUpdate = await Enrollments.findOne({
       where: { id: req.params.id },
     });
