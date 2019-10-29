@@ -27,7 +27,7 @@ class StudentController {
   async update(req, res) {
     const { email } = req.body;
 
-    const user = await Student.findByPk(req.userId);
+    const user = await Student.findByPk(req.params.id);
 
     if (email !== user.email) {
       const UserExists = await Student.findOne({
@@ -53,9 +53,9 @@ class StudentController {
   async show(req, res) {
     const { id } = req.params;
 
-    const { name, age, weight, height } = await Student.findByPk(id);
+    const { name, age, weight, height, email } = await Student.findByPk(id);
 
-    return res.json({ name, age, weight, height });
+    return res.json({ name, age, weight, height, email });
   }
 }
 

@@ -21,7 +21,7 @@ routes.post('/users', UserController.store);
 routes.use(authMiddleware);
 
 routes.post('/students', StudentController.store);
-routes.put('/students', StudentController.update);
+routes.put('/students/:id', StudentController.update);
 routes.get('/students/:id', StudentController.show);
 
 routes.post('/files', upload.single('file'), FileController.store);
@@ -33,6 +33,10 @@ routes.delete('/plans/:myPlanId', PlansController.delete);
 routes.get('/plans', PlansController.index);
 
 // Meus cadastros
+routes.get('/enrollments', EnrollmentsController.index);
+routes.get('/enrollments/:id', EnrollmentsController.show);
 routes.post('/enrollments', EnrollmentsController.store);
+routes.put('/enrollments/:id', EnrollmentsController.update);
+routes.delete('/enrollments/:id', EnrollmentsController.delete);
 
 export default routes;
