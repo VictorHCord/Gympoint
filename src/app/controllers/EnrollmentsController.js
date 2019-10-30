@@ -4,7 +4,7 @@ import pt from 'date-fns/locale/pt';
 import Enrollments from '../models/Enrollments';
 import Student from '../models/Student';
 import Plans from '../models/Plans';
-import Notification from '../schemas/Notification';
+import Mail from '../../lib/Mail';
 
 class EnrollmentstController {
   async index(req, res) {
@@ -71,7 +71,6 @@ class EnrollmentstController {
 
     const checkEnrolls = await Student.findOne({
       where: { id: student_id },
-      attributes: ['name', 'email'],
     });
 
     if (!checkEnrolls) {
@@ -112,7 +111,7 @@ class EnrollmentstController {
     }
 
     /* Calculate value of price */
-    const totalPrice = await (plansAvailable.price * plansAvailable.duration);
+    const totalPrice = (await plansAvailable.price) * plansAvailable.duration;
 
     /* Calculate final date */
 
@@ -126,28 +125,30 @@ class EnrollmentstController {
       price: totalPrice,
     });
 
-    /* Notify about created of enrollments */
-
-    const getName = await Student.findOne({
+    const checkingNameEmail = await Student.findOne({
       where: { id: student_id },
+      attributes: ['name', 'email'],
     });
 
-    const formattedDate = format(
-      startDate,
-      "'Data de inicio:' dd 'de' MMMM 'de' yyyy ', às' H:mm'h'",
-
-      { locale: pt }
-    );
-
-    const formattedEnd = format(
-      finalDate,
-      "'Data de encerramento:' dd 'de' MMMM 'de' yyyy ', às' H:mm'h'",
-      { locale: pt }
-    );
-
-    await Notification.create({
-      content: `Inscrição realizada, no nome de ${getName.name}. ${formattedDate} e ${formattedEnd}`,
-      user: student_id,
+    await Mail.sendMail({
+      to: `${checkingNameEmail.name}  <${checkingNameEmail.email}>`,
+      subject: 'Enviado com sucesso',
+      template: 'registration',
+      context: {
+        student: checkingNameEmail.name,
+        plan: plansAvailable.title,
+        totalPrice,
+        initialDate: format(
+          startDate,
+          "'dia' dd 'de' MMMM' de 'yyyy,' às' H:mm'h'",
+          { locale: pt }
+        ),
+        finalDate: format(
+          finalDate,
+          "'dia' dd 'de' MMMM' de 'yyyy,' às' H:mm'h'",
+          { locale: pt }
+        ),
+      },
     });
 
     return res.json(createRegis);
@@ -233,17 +234,18 @@ class EnrollmentstController {
   }
 
   async delete(req, res) {
-    const enrollmentUpdate = await Enrollments.findOne({
+    const enrollmentDelete = await Enrollments.findOne({
       where: { id: req.params.id },
     });
 
-    if (!enrollmentUpdate) {
+    if (!enrollmentDelete) {
       return res.status(400).json({ error: 'User does not register' });
     }
 
-    await enrollmentUpdate.destroy({
-      where: { id: enrollmentUpdate },
+    await enrollmentDelete.destroy({
+      where: { id: enrollmentDelete },
     });
+
     return res.json({ message: 'Enrollments delete with sucess' });
   }
 }
