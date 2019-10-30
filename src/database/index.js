@@ -1,6 +1,5 @@
 import Sequelize from 'sequelize';
 import mongoose from 'mongoose';
-
 import Student from '../app/models/Student';
 import User from '../app/models/User';
 import Plans from '../app/models/Plans';

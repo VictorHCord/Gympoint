@@ -1,10 +1,10 @@
 import * as Yup from 'yup';
-import { parseISO, isBefore, addMonths, format } from 'date-fns';
-import pt from 'date-fns/locale/pt';
+import { parseISO, isBefore, addMonths } from 'date-fns';
 import Enrollments from '../models/Enrollments';
 import Student from '../models/Student';
 import Plans from '../models/Plans';
-import Mail from '../../lib/Mail';
+import RegistrationMail from '../jobs/RegistrationMail';
+import Queue from '../../lib/Queue';
 
 class EnrollmentstController {
   async index(req, res) {
@@ -130,27 +130,13 @@ class EnrollmentstController {
       attributes: ['name', 'email'],
     });
 
-    await Mail.sendMail({
-      to: `${checkingNameEmail.name}  <${checkingNameEmail.email}>`,
-      subject: 'Enviado com sucesso',
-      template: 'registration',
-      context: {
-        student: checkingNameEmail.name,
-        plan: plansAvailable.title,
-        totalPrice,
-        initialDate: format(
-          startDate,
-          "'dia' dd 'de' MMMM' de 'yyyy,' às' H:mm'h'",
-          { locale: pt }
-        ),
-        finalDate: format(
-          finalDate,
-          "'dia' dd 'de' MMMM' de 'yyyy,' às' H:mm'h'",
-          { locale: pt }
-        ),
-      },
+    await Queue.add(RegistrationMail.key, {
+      checkingNameEmail,
+      plansAvailable,
+      totalPrice,
+      startDate,
+      finalDate,
     });
-
     return res.json(createRegis);
   }
 
