@@ -8,6 +8,7 @@ import SessionController from './app/controllers/SessionController';
 import FileController from './app/controllers/FileController';
 import PlansController from './app/controllers/PlansController';
 import EnrollmentsController from './app/controllers/EnrollmentsController';
+import CheckinsController from './app/controllers/CheckinsController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -39,4 +40,7 @@ routes.post('/enrollments', EnrollmentsController.store);
 routes.put('/enrollments/:id', EnrollmentsController.update);
 routes.delete('/enrollments/:id', EnrollmentsController.delete);
 
+// Checkins
+routes.post('/students/:id/checkins', CheckinsController.store);
+routes.get('/students/:id/checkins', CheckinsController.show);
 export default routes;
