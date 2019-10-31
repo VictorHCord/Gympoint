@@ -31,20 +31,21 @@ class AnswerController {
       return res.status(400).json({ error: 'Student not found' });
     }
 
-    const { answer, student_id } = req.body;
+    const { answer } = req.body;
 
     const answer_at = new Date();
 
     const createAnswer = await HelpOrders.create({
       answer,
       answer_at,
-      student_id,
+      student_id: helpId.student_id,
       question: helpId.question,
     });
 
     const getAnswer = await HelpOrders.findOne({
       where: { answer },
     });
+
     await Queue.add(AssistanceMail.key, {
       checkingNameEmail,
       helpId,
@@ -52,6 +53,23 @@ class AnswerController {
     });
 
     return res.json(createAnswer);
+  }
+
+  async index(req, res) {
+    const { id } = req.params;
+
+    const help_orders = await HelpOrders.findAll({
+      where: { id },
+      attributes: ['id', 'question', 'student_id', 'answer', 'answer_at'],
+      include: [
+        {
+          model: Student,
+          as: 'students',
+          attributes: ['name', 'email'],
+        },
+      ],
+    });
+    return res.json(help_orders);
   }
 }
 export default new AnswerController();

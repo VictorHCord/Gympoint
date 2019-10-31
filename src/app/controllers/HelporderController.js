@@ -34,7 +34,7 @@ class HelporderController {
 
     const help_orders = await HelpOrders.findAll({
       where: { student_id },
-      attributes: ['id', 'question', 'student_id'],
+      attributes: ['id', 'question', 'student_id', 'answer', 'answer_at'],
       include: [
         {
           model: Student,
