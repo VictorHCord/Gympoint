@@ -10,6 +10,7 @@ import PlansController from './app/controllers/PlansController';
 import EnrollmentsController from './app/controllers/EnrollmentsController';
 import HelporderController from './app/controllers/HelporderController';
 import CheckinsController from './app/controllers/CheckinsController';
+import AnswerController from './app/controllers/AnswerController';
 
 import authMiddleware from './app/middlewares/auth';
 
@@ -48,5 +49,5 @@ routes.get('/students/:id/checkins', CheckinsController.show);
 // Help orders
 routes.post('/students/:student_id/help-orders', HelporderController.store);
 routes.get('/students/:student_id/help-orders', HelporderController.index);
-
+routes.post('/help-orders/:id/answer', AnswerController.store);
 export default routes;
