@@ -13,14 +13,14 @@ class CheckinsController {
     });
 
     if (!studentNotExist) {
-      return res.status(401).json({ error: 'Student does not exist' });
+      return res.status(400).json({ error: 'Student does not exist' });
     }
 
     const enrollments = await Enrollments.findOne({
       where: { student_id },
     });
     if (!enrollments) {
-      return res.status(401).json({ error: 'Not found enrollments' });
+      return res.status(400).json({ error: 'Not found enrollments' });
     }
 
     const oldDate = format(subDays(new Date(), 7), 'yyyy-MM-dd');
@@ -49,7 +49,7 @@ class CheckinsController {
     });
 
     if (!checkin_id) {
-      return res.status(401).json({ error: 'Checkin not found' });
+      return res.status(400).json({ error: 'Checkin not found' });
     }
 
     return res.json(checkin_id);

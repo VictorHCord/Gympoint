@@ -8,6 +8,7 @@ import SessionController from './app/controllers/SessionController';
 import FileController from './app/controllers/FileController';
 import PlansController from './app/controllers/PlansController';
 import EnrollmentsController from './app/controllers/EnrollmentsController';
+import HelporderController from './app/controllers/HelporderController';
 import CheckinsController from './app/controllers/CheckinsController';
 
 import authMiddleware from './app/middlewares/auth';
@@ -43,4 +44,9 @@ routes.delete('/enrollments/:id', EnrollmentsController.delete);
 // Checkins
 routes.post('/students/:id/checkins', CheckinsController.store);
 routes.get('/students/:id/checkins', CheckinsController.show);
+
+// Help orders
+routes.post('/students/:student_id/help-orders', HelporderController.store);
+routes.get('/students/:student_id/help-orders', HelporderController.index);
+
 export default routes;
